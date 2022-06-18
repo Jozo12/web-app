@@ -97,13 +97,13 @@
 	    <repository>
 	      <id>nexus</id>
 	      <name>ACADA Learning Releases Nexus Repository</name>
-	      <url>http://18.237.8.44:8081/repository/Keystone-app-release/</url>
+	      <url>http://172.31.2.196:8081/repository/access-app-release/</url>
 	    </repository>
 	    
 	    <snapshotRepository>
 	      <id>nexus</id>
 	      <name>ACADA Learning Snapshot Nexus Repository </name>
-	      <url>http://18.237.8.44:8081/repository/keystone-app-snapshot/</url>
+	      <url>http://172.31.2.196:8081/repository/access-app-snapshot/</url>
 	    </snapshotRepository>
 	    
 	</distributionManagement>
