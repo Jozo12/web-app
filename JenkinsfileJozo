@@ -1,53 +1,54 @@
 pipeline{
     agent any
     tools{
-      maven "maven3.8.4"
+        maven "maven3.8.4"
     }
-stages{
-  stage('1.GitClone'){
-  steps{
-    sh "echo Github cloning"
-    git "https://github.com/Jozo12/web-app.git"
-  }
-}
-stage('2.MavenBuild'){
-  steps{
-  sh "echo build packages"
-  sh "mvn clean package"
-}
-}
-stage('3.testingtheCode'){
-  steps{
-    sh "mvn sonar:sonar"
-  }
-  }
-stage('4.backupArchitfacts'){
-  steps{
-    sh "mvn deploy"
-  }
-  }
- stage('5.Deploytostaging'){
-     steps{
-         deploy adapters: [tomcat9(credentialsId: 'tomcat_Cred', path: '', url: 'http://35.89.100.158:8080/')], contextPath: null, war: 'target/*.war'
-     }
- }
- stage('6.Approval'){
-    steps{
-    sh "echo Approval Needed"
-    timeout(time:5,unit:'DAYS'){
-      input message:'Approval for Production'
-    }
-  }
-}
- stage('7.Deploytostaging'){
-     steps{
-         deploy adapters: [tomcat9(credentialsId: 'tomcat_Cred', path: '', url: 'http://35.89.100.158:8080/')], contextPath: null, war: 'target/*.war'
-     }
- }
- stage('8.Emailnotification'){
-  steps{
-    emailext body: 'The build is success', subject: 'Build Success', to: 'acada@acadalearning.com'
-  }
- }
-}
+    stages{
+        stage("1.Codeclone"){
+            steps{
+                git "https://github.com/Jozo12/web-app.git"
+            }
+        }
+        stage("2.BuildApplication"){
+            steps{
+                sh "mvn clean package"
+            }
+        }
+        stage("3.CodeQuality"){
+            steps{
+                sh "mvn sonar:sonar"
+            }
+        }
+        stage("4.Artifactory"){
+            steps{
+                sh "mvn deploy"
+            }
+        }
+        stage("5.DeploytoUAT"){
+            steps{
+                deploy adapters: [tomcat9(credentialsId: 'tomcat-cred2', path: '', url: 'http://35.89.100.158:8080/')], contextPath: null, war: 'target/*.war'
+            }
+        }
+        stage("6.Approval"){
+            steps{
+                timeout(time:5, unit: "DAYS"){
+                    input message : "Approval Required"
+                }
+            }
+            }
+        stage("7.DeploytoProd"){
+            steps{
+                deploy adapters: [tomcat9(credentialsId: 'tomcat-cred2', path: '', url: 'http://35.89.100.158:8080/')], contextPath: null, war: 'target/*.war'
+            }
+        } 
+        stage("8.EmailNotification"){
+            steps{
+                emailext body: 'Build success', subject: 'Build Status', to: 'devopsteam@acada.com'
+            }
+        }
+        }    
+        
+    
+    
+    
 }
