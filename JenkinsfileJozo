@@ -7,7 +7,7 @@ stages{
   stage('1.GitClone'){
   steps{
     sh "echo Github cloning"
-    git 'https://github.com/team16flight/web-app.git'
+    git "https://github.com/Jozo12/web-app.git"
   }
 }
 stage('2.MavenBuild'){
