@@ -1,54 +1,40 @@
+//Declarative
+
 pipeline{
-    agent any
-    tools{
-        maven "maven3.8.4"
-    }
-    stages{
-        stage("1.Codeclone"){
-            steps{
-                git "https://github.com/Jozo12/web-app.git"
-            }
-        }
-        stage("2.BuildApplication"){
-            steps{
-                sh "mvn clean package"
-            }
-        }
-        stage("3.CodeQuality"){
-            steps{
-                sh "mvn sonar:sonar"
-            }
-        }
-        stage("4.Artifactory"){
-            steps{
-                sh "mvn deploy"
-            }
-        }
-        stage("5.DeploytoUAT"){
-            steps{
-                deploy adapters: [tomcat9(credentialsId: 'tomcat-cred2', path: '', url: 'http://35.89.100.158:8080/')], contextPath: null, war: 'target/*.war'
-            }
-        }
-        stage("6.Approval"){
-            steps{
-                timeout(time:5, unit: "DAYS"){
-                    input message : "Approval Required"
-                }
-            }
-            }
-        stage("7.DeploytoProd"){
-            steps{
-                deploy adapters: [tomcat9(credentialsId: 'tomcat-cred2', path: '', url: 'http://35.89.100.158:8080/')], contextPath: null, war: 'target/*.war'
-            }
-        } 
-        stage("8.EmailNotification"){
-            steps{
-                emailext body: 'Build success', subject: 'Build Status', to: 'devopsteam@acada.com'
-            }
-        }
-        }    
-        
-    
-    
-    
+	agent any
+	tools{
+	maven "maven3.8.4"
+	}
+stages{
+	stage("1.Cloning commits in github"){
+	steps{
+	git "https://github.com/Jozo12/web-app.git"
+	}
+	}
+	stage("2.maven build test deploy"){
+	steps{
+	sh "mvn package"
+	sh "mvn sonar:sonar"
+	sh "mvn deploy"
+	}
+	}
+	stage("3.UAT testing and approval"){
+	steps{
+    deploy adapters: [tomcat9(credentialsId: 'tomcat-cred2', path: '', url: 'http://35.88.83.206:8080/')], contextPath: null, war: 'target/*.war'
+	 timeout(time: 5, unit: "DAYS"){
+	input message: "Approval or Rejection Required"
+	}
+	}
+	}
+	stage("4.Deploying to Application servers"){
+	steps{
+    deploy adapters: [tomcat9(credentialsId: 'tomcat-cred2', path: '', url: 'http://35.88.83.206:8080/')], contextPath: null, war: 'target/*.war'
+	}
+	}
+	stage("5.EmailNotification"){
+	steps{
+    emailext body: 'build success', subject: 'Build status', to: 'devopsteam@acada'
+	}
+	}
+}
 }
